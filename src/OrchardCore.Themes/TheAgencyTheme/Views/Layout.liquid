@@ -32,5 +32,43 @@
         {% render_section "Footer", required: false %}
         {% resources type: "FootScript" %}
     </div>
+
+     {% if User.Identity.IsAuthenticated %}
+    
+ <div id="role-changed-modal" class="modal fade" tabindex="-1" aria-modal="true" role="dialog">
+
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Your permissions have been updated</h5>
+                </div>
+                <div class="modal-body">
+                    <p>An administrator has changed your role. You must sign out and sign back in for the changes to take effect.</p>
+                </div>
+                <div class="modal-footer">
+                    <form action="/Users/LogOff?returnUrl=/Login" method="post">
+    {% antiforgerytoken %}
+    <button type="submit" class="btn btn-primary">Sign Out</button>
+</form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        (function () {
+            var roleChanged = document.cookie.split(';').some(function(c) {
+                return c.trim().startsWith('RoleChanged=true');
+            });
+
+            if (roleChanged) {
+                var modal = new bootstrap.Modal(document.getElementById('role-changed-modal'), {
+                    backdrop: 'static',
+                    keyboard: false
+                });
+                modal.show();
+            }
+        })();
+    </script>
+    {% endif %}
 </body>
 </html>
