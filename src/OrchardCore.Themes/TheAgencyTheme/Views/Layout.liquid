@@ -33,10 +33,10 @@
         {% resources type: "FootScript" %}
     </div>
 
-     {% if User.Identity.IsAuthenticated %}
+    {% if User.Identity.IsAuthenticated %}
     
- <div id="role-changed-modal" class="modal fade" tabindex="-1" aria-modal="true" role="dialog">
-
+    <!-- Role Changed Modal -->
+    <div id="role-changed-modal" class="modal fade" tabindex="-1" aria-modal="true" role="dialog">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
@@ -47,28 +47,72 @@
                 </div>
                 <div class="modal-footer">
                     <form action="/Users/LogOff?returnUrl=/Login" method="post">
-    {% antiforgerytoken %}
-    <button type="submit" class="btn btn-primary">Sign Out</button>
-</form>
+                        {% antiforgerytoken %}
+                        <button type="submit" class="btn btn-primary">Sign Out</button>
+                    </form>
                 </div>
             </div>
         </div>
     </div>
-    <script>
-        (function () {
-            var roleChanged = document.cookie.split(';').some(function(c) {
-                return c.trim().startsWith('RoleChanged=true');
-            });
 
-            if (roleChanged) {
-                var modal = new bootstrap.Modal(document.getElementById('role-changed-modal'), {
-                    backdrop: 'static',
-                    keyboard: false
+    <script>
+        console.log('=== RoleChanged Check Script Loading ===');
+        
+        (function () {
+            console.log('RoleChanged check function executing...');
+            
+            var checkRoleChanged = function() {
+                console.log('Calling /api/account/role-changed...');
+                
+                fetch('/api/account/role-changed', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    credentials: 'include'
+                })
+                .then(response => {
+                    console.log('Fetch response status:', response.status);
+                    if (!response.ok) {
+                        throw new Error('HTTP error, status = ' + response.status);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('API Response:', data);
+                    console.log('roleChanged value:', data.roleChanged);
+                    
+                    if (data.roleChanged === true) {
+                        console.log('RoleChanged is TRUE - showing modal');
+                        
+                        var modalElement = document.getElementById('role-changed-modal');
+                        if (modalElement) {
+                            var modal = new bootstrap.Modal(modalElement, {
+                                backdrop: 'static',
+                                keyboard: false
+                            });
+                            modal.show();
+                        } else {
+                            console.error('Modal element not found!');
+                        }
+                    } else {
+                        console.log('RoleChanged is FALSE - no modal shown');
+                    }
+                })
+                .catch(error => {
+                    console.error('Fetch error:', error);
                 });
-                modal.show();
+            };
+            
+            // Call on page load
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', checkRoleChanged);
+            } else {
+                checkRoleChanged();
             }
         })();
     </script>
+
     {% endif %}
 </body>
 </html>

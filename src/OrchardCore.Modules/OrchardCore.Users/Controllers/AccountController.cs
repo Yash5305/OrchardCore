@@ -194,6 +194,13 @@ public sealed class AccountController : AccountBaseController
     [HttpPost]
     public async Task<IActionResult> LogOff(string returnUrl = null)
     {
+        var user = await _userService.GetAuthenticatedUserAsync(User);
+        if (user is User u)
+        {
+            u.RoleChanged = false;
+            await _userManager.UpdateAsync(u);
+        }
+
         await _signInManager.SignOutAsync();
 
         _logger.LogInformation(4, "User logged out.");
@@ -236,4 +243,16 @@ public sealed class AccountController : AccountBaseController
     [HttpGet]
     public IActionResult ChangePasswordConfirmation()
         => View();
+
+    [HttpGet]
+    [Route("api/users/me/role-changed")]
+    public async Task<IActionResult> GetRoleChanged()
+    {
+        var user = await _userService.GetAuthenticatedUserAsync(User);
+        if (user is User u)
+        {
+            return Ok(new { roleChanged = u.RoleChanged });
+        }
+        return Unauthorized();
+    }
 }

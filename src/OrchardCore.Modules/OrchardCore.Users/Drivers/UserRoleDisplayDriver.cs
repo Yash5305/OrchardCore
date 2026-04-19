@@ -142,17 +142,45 @@ public sealed class UserRoleDisplayDriver : DisplayDriver<User>
 
             if (rolesToRemove.Count > 0)
             {
-                // When roles are removed, the security stamp needs to be updated to invalidate existing authentication sessions.
+                System.Diagnostics.Debug.WriteLine($"[RoleChange] Roles removed for user: {user.UserName} (ID: {user.UserId})");
                 await _userManager.UpdateSecurityStampAsync(user);
+
+                if (user is User u)
+                {
+                    u.RoleChanged = true;
+                    await _userManager.UpdateAsync(u);
+                    System.Diagnostics.Debug.WriteLine($"[RoleChange] Set RoleChanged flag for user: {u.UserId}");
+                }
             }
 
-            // Add new roles.
+            // Add new roles
+            var rolesAdded = false;
             foreach (var role in accessibleAndSelectedRoleNames)
             {
                 var normalizedName = _userManager.NormalizeName(role);
                 if (!await _userRoleStore.IsInRoleAsync(user, normalizedName, default))
                 {
                     await _userRoleStore.AddToRoleAsync(user, normalizedName, default);
+                    rolesAdded = true;
+                }
+            }
+
+            if (rolesAdded)
+            {
+                System.Diagnostics.Debug.WriteLine($"[RoleChange] Roles added for user: {user.UserName} (ID: {user.UserId})");
+                if (user is User u)
+                {
+                    u.RoleChanged = true;
+                    var result = await _userManager.UpdateAsync(u);
+                    System.Diagnostics.Debug.WriteLine($"[RoleChange] UpdateAsync result: {result.Succeeded}");
+                    if (!result.Succeeded)
+                    {
+                        foreach (var error in result.Errors)
+                        {
+                            System.Diagnostics.Debug.WriteLine($"[RoleChange] Error: {error.Code} - {error.Description}");
+                        }
+                    }
+                    System.Diagnostics.Debug.WriteLine($"[RoleChange] RoleChanged flag set to true for user: {u.UserId}");
                 }
             }
         }
@@ -173,5 +201,27 @@ public sealed class UserRoleDisplayDriver : DisplayDriver<User>
         }
 
         return authorizedRoleNames;
+    }
+
+    private void SetRoleChangedCookie(HttpContext httpContext, string userId)
+    {
+        if (string.IsNullOrEmpty(userId))
+        {
+            // Log this for debugging
+            System.Diagnostics.Debug.WriteLine("ERROR: userId is null or empty in SetRoleChangedCookie");
+            return;
+        }
+
+        var cookieOptions = new Microsoft.AspNetCore.Http.CookieOptions
+        {
+            HttpOnly = false, // Must be accessible by JavaScript
+            IsEssential = true,
+            SameSite = Microsoft.AspNetCore.Http.SameSiteMode.Lax, // Changed from Strict
+            Expires = DateTimeOffset.UtcNow.AddMinutes(30) // Add expiration
+        };
+
+        var cookieName = $"RoleChanged_{userId}";
+        System.Diagnostics.Debug.WriteLine($"Setting cookie: {cookieName}");
+        httpContext.Response.Cookies.Append(cookieName, "true", cookieOptions);
     }
 }

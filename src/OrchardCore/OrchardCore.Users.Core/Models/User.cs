@@ -39,6 +39,8 @@ public class User : Entity, IUser
 
     public string ResetToken { get; set; }
 
+    public bool RoleChanged { get; set; } = false;
+
     public IList<string> RoleNames { get; set; } = [];
 
     public IList<UserClaim> UserClaims { get; set; } = [];
