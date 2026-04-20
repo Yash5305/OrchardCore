@@ -7,6 +7,7 @@ using OrchardCore.DisplayManagement.Notify;
 using OrchardCore.DisplayManagement.Views;
 using OrchardCore.Security;
 using OrchardCore.Security.Services;
+using OrchardCore.Users.Events;
 using OrchardCore.Users.Models;
 using OrchardCore.Users.ViewModels;
 
@@ -20,6 +21,7 @@ public sealed class UserRoleDisplayDriver : DisplayDriver<User>
     private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly INotifier _notifier;
     private readonly IAuthorizationService _authorizationService;
+    private readonly IEnumerable<IUserRoleChangedEventHandler> _roleChangedHandlers;
 
     internal readonly IHtmlLocalizer H;
 
@@ -30,7 +32,8 @@ public sealed class UserRoleDisplayDriver : DisplayDriver<User>
         IHttpContextAccessor httpContextAccessor,
         INotifier notifier,
         IAuthorizationService authorizationService,
-        IHtmlLocalizer<UserRoleDisplayDriver> htmlLocalizer)
+        IHtmlLocalizer<UserRoleDisplayDriver> htmlLocalizer,
+        IEnumerable<IUserRoleChangedEventHandler> roleChangedHandlers)
     {
         _userManager = userManager;
         _roleService = roleService;
@@ -39,6 +42,7 @@ public sealed class UserRoleDisplayDriver : DisplayDriver<User>
         _notifier = notifier;
         _authorizationService = authorizationService;
         H = htmlLocalizer;
+        _roleChangedHandlers = roleChangedHandlers;
     }
 
     public override Task<IDisplayResult> DisplayAsync(User user, BuildDisplayContext context)
@@ -143,15 +147,14 @@ public sealed class UserRoleDisplayDriver : DisplayDriver<User>
             if (rolesToRemove.Count > 0)
             {
                 System.Diagnostics.Debug.WriteLine($"[RoleChange] Roles removed for user: {user.UserName} (ID: {user.UserId})");
-                await _userManager.UpdateSecurityStampAsync(user);
 
-                if (user is User u)
+                // Notify all registered role-change event handlers
+                foreach (var handler in _roleChangedHandlers)
                 {
-                    u.RoleChanged = true;
-                    await _userManager.UpdateAsync(u);
-                    System.Diagnostics.Debug.WriteLine($"[RoleChange] Set RoleChanged flag for user: {u.UserId}");
+                    await handler.RolesRemovedAsync(user, rolesToRemove);
                 }
             }
+            
 
             // Add new roles
             var rolesAdded = false;
@@ -168,19 +171,10 @@ public sealed class UserRoleDisplayDriver : DisplayDriver<User>
             if (rolesAdded)
             {
                 System.Diagnostics.Debug.WriteLine($"[RoleChange] Roles added for user: {user.UserName} (ID: {user.UserId})");
-                if (user is User u)
+                // Notify all registered role-change event handlers
+                foreach (var handler in _roleChangedHandlers)
                 {
-                    u.RoleChanged = true;
-                    var result = await _userManager.UpdateAsync(u);
-                    System.Diagnostics.Debug.WriteLine($"[RoleChange] UpdateAsync result: {result.Succeeded}");
-                    if (!result.Succeeded)
-                    {
-                        foreach (var error in result.Errors)
-                        {
-                            System.Diagnostics.Debug.WriteLine($"[RoleChange] Error: {error.Code} - {error.Description}");
-                        }
-                    }
-                    System.Diagnostics.Debug.WriteLine($"[RoleChange] RoleChanged flag set to true for user: {u.UserId}");
+                    await handler.RolesAddedAsync(user, accessibleAndSelectedRoleNames);
                 }
             }
         }

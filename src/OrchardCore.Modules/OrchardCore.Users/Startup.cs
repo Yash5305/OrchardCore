@@ -123,6 +123,7 @@ public sealed class Startup : StartupBase
         services.AddScoped<ISetupEventHandler, SetupEventHandler>();
         services.AddScoped<ICommandHandler, UserCommands>();
         services.AddScoped<IExternalLoginEventHandler, ScriptExternalLoginEventHandler>();
+        services.AddScoped<IUserRoleChangedEventHandler, UserRoleChangedEventHandler>();
 
         services.AddPermissionProvider<Permissions>();
         services.AddNavigationProvider<AdminMenu>();
