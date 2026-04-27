@@ -376,7 +376,7 @@ body:not(.left-sidebar-compact) #ta-left-sidebar #left-nav {
 }
 
 body:not(.left-sidebar-compact) #ta-left-sidebar li .item-label:hover {
-  background-color: rgba(0, 0, 0, 0.1);
+  background-color: var(--oc-li-hover-bg-color);
 }
 
 body:not(.left-sidebar-compact) #ta-left-sidebar li > figure > ul > li.active > .item-label {

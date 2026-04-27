@@ -150,7 +150,10 @@ a:hover {
 }
 
 .btn:hover, .button:hover {
-  text-decoration: none;
+  /*text-decoration: none;*/
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+  transition: outline 0.15s ease;
 }
 
 .btn-link:focus-visible {
@@ -942,6 +945,7 @@ html[dir="rtl"][dir=rtl] .bootstrap-select .bs-ok-default:after {
 
 .dropdown-item:hover, .dropdown-item:focus {
   text-decoration: none;
+  background-color: var(--oc-li-hover-bg-color);
 }
 
 .hint {
@@ -11066,4 +11070,66 @@ input:not([type=checkbox]):not([type=radio]).input-validation-error {
   color: var(--bs-white);
   background-color: var(--bs-gray-900);
   border-color: var(--bs-gray-900);
+}
+
+html[data-bs-theme="light"] {
+    --oc-subitem-bg: rgba(0, 0, 0, 0.03);
+    --oc-parent-bg: rgba(0, 0, 0, 0.05);
+    --oc-active-bg: rgba(0, 0, 0, 0.20);
+    --oc-section-bg: rgba(0, 0, 0, 0.04);
+    --oc-dropdown-hover-bg: rgba(0, 0, 0, 0.08);
+    --oc-dropdown-hover-text: #000000;
+    --oc-btn-outline: rgba(0, 0, 0, 0.6);
+    --oc-li-hover-bg-color: rgba(0, 0, 0, 0.09);
+}
+
+html[data-bs-theme="dark"] {
+    --oc-subitem-bg: rgba(255, 255, 255, 0.05);
+    --oc-parent-bg: rgba(255, 255, 255, 0.08);
+    --oc-active-bg: rgba(255, 255, 255, 0.20);
+    --oc-section-bg: rgba(255, 255, 255, 0.04);
+    --oc-dropdown-hover-bg: rgba(255, 255, 255, 0.15);
+    --oc-dropdown-hover-text: #ffffff;
+    --oc-btn-outline: rgba(255, 255, 255, 0.7);
+    --oc-li-hover-bg-color: rgba(255, 255, 255, 0.15);
+}
+
+#ta-left-sidebar ul ul li .item-label {
+    background-color: var(--oc-subitem-bg);
+}
+
+#ta-left-sidebar li.has-items > a.item-label {
+    background-color: var(--oc-parent-bg);
+}
+
+#ta-left-sidebar .item-label:hover {
+    background-color: var(--oc-li-hover-bg-color);
+}
+
+#ta-left-sidebar ul ul li.active .item-label {
+    background-color: var(--oc-active-bg);
+    font-weight: 600;
+}
+
+#ta-left-sidebar li.active.has-items {
+    border-left: 4px solid var(--bs-primary);
+    background-color: var(--oc-section-bg);
+}
+
+html[data-bs-theme="light"] .btn:hover {
+    outline: 2px solid var(--oc-btn-outline);
+}
+
+html[data-bs-theme="dark"] .btn:hover {
+    outline: 2px solid var(--oc-btn-outline);
+}
+
+html[data-bs-theme="light"] .dropdown-item:hover {
+    background-color: var(--oc-dropdown-hover-bg);
+    color: var(--oc-dropdown-hover-text);
+}
+
+html[data-bs-theme="dark"] .dropdown-item:hover {
+    background-color: var(--oc-dropdown-hover-bg);
+    color: var(--oc-dropdown-hover-text);
 }
