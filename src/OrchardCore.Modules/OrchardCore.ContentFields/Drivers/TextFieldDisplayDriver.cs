@@ -12,10 +12,17 @@ namespace OrchardCore.ContentFields.Drivers;
 
 public sealed class TextFieldDisplayDriver : ContentFieldDisplayDriver<TextField>
 {
+    private const string TelEditor = "Tel";
+
+    private readonly IPhoneFormatValidator _phoneFormatValidator;
+
     internal readonly IStringLocalizer S;
 
-    public TextFieldDisplayDriver(IStringLocalizer<TextFieldDisplayDriver> localizer)
+    public TextFieldDisplayDriver(
+        IPhoneFormatValidator phoneFormatValidator,
+        IStringLocalizer<TextFieldDisplayDriver> localizer)
     {
+        _phoneFormatValidator = phoneFormatValidator;
         S = localizer;
     }
 
