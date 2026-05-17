@@ -12,7 +12,10 @@ namespace OrchardCore.ContentFields.Handlers;
 
 public class TextFieldHandler : ContentFieldHandler<TextField>
 {
+    private const string TelEditor = "Tel";
+
     private readonly ITypeActivatorFactory<ContentPart> _contentPartFactory;
+    private readonly IPhoneFormatValidator _phoneFormatValidator;
     private readonly ILiquidTemplateManager _liquidTemplateManager;
 
     protected readonly IStringLocalizer S;
@@ -20,10 +23,12 @@ public class TextFieldHandler : ContentFieldHandler<TextField>
     public TextFieldHandler(
         ITypeActivatorFactory<ContentPart> contentPartFactory,
         ILiquidTemplateManager liquidTemplateManager,
+        IPhoneFormatValidator phoneFormatValidator,
         IStringLocalizer<TextFieldHandler> stringLocalizer)
     {
         _contentPartFactory = contentPartFactory;
         _liquidTemplateManager = liquidTemplateManager;
+        _phoneFormatValidator = phoneFormatValidator;
         S = stringLocalizer;
     }
 
