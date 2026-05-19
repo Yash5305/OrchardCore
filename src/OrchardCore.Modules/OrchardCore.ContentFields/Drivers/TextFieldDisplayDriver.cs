@@ -60,6 +60,14 @@ public sealed class TextFieldDisplayDriver : ContentFieldDisplayDriver<TextField
             context.Updater.ModelState.AddModelError(Prefix, nameof(field.Text), S["A value is required for {0}.", context.PartFieldDefinition.DisplayName()]);
         }
 
+        // if editor is tel && field is not empty && phone validator says it is invalid
+        if(GetEditorShapeType(context).EndsWith(TelEditor) && !string.IsNullOrWhiteSpace(field.Text) && !_phoneFormatValidator.IsValid(field.Text))
+        {
+            context.Updater.ModelState.AddModelError(Prefix, nameof(field.Text), S["The phone number is invalid for {0}.", context.PartFieldDefinition.DisplayName()]);
+
+        }
+        // show form error
+
         return Edit(field, context);
     }
 }
